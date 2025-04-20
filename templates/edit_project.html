@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Project</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/me.png') }}" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            color: var(--secondary-color);
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+
+        .form-control, .form-select {
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px dashed #ddd;
+        }
+
+        .tags-badge {
+            background-color: var(--primary-color);
+            color: white;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5">
+        <div class="form-container">
+            <h1 class="form-title">Edit Project</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <img src="{{ project.image_url }}" alt="Current Image" class="image-preview" id="imagePreview">
+                    <input type="file" class="form-control" id="imageInput" name="image" accept="image/*">
+                    <small class="text-muted">Leave empty to keep current image</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Project Title</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ project.title }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="5" required>{{ project.description }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="url" class="form-label">Project URL</label>
+                    <input type="url" class="form-control" id="url" name="url" value="{{ project.url }}">
+                </div>
+                <div>
+                    <label for="category">Select Project Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="Machine Learning">Machine Learning</option>
+                        <option value="Cybersecurity">Cybersecurity</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Full Stack Web Development">Full Stack Web Development</option>
+                        <option value="3D Animation">3D Animation</option>
+                        <option value="UI/UX Design">UI/UX Design</option>
+                        <option value="Web Design">Web Design</option>
+                        <option value="Data Analytics">Data Analytics</option>
+                        <option value="Graphic Design">Graphic Design</option>
+                        <!-- Add more categories here -->
+                    </select>
+
+                </div>
+
+                <div class="mb-3">
+                    <label for="tags" class="form-label">Tags (comma separated)</label>
+                    <input type="text" class="form-control" id="tags" name="tags" value="{{ project.tags }}">
+                    <div class="mt-2" id="tagsPreview">
+                        {% if project.tags %}
+                            {% for tag in project.tags.split(',') %}
+                                <span class="tags-badge">{{ tag.strip() }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const tagsInput = document.getElementById('tags');
+        const tagsPreview = document.getElementById('tagsPreview');
+
+        if (imageInput && imagePreview) {
+            imageInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        if (tagsInput && tagsPreview) {
+            tagsInput.addEventListener('input', function () {
+                const tags = this.value.split(',').filter(tag => tag.trim() !== '');
+                tagsPreview.innerHTML = '';
+                tags.forEach(tag => {
+                    const badge = document.createElement('span');
+                    badge.className = 'tags-badge';
+                    badge.textContent = tag.trim();
+                    tagsPreview.appendChild(badge);
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

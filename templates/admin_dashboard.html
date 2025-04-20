@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="icon" href="{{ url_for('static', filename='img/me.png') }}" type="image/png" />
+  <!-- External Stylesheets -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Custom Styles -->
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2c3e50;
+      --accent-color: #e74c3c;
+      --light-bg: #f8f9fa;
+      --dark-bg: #343a40;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+    }
+    .sidebar {
+      background-color: var(--secondary-color);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      width: 250px;
+      transition: all 0.3s;
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      padding: 12px 15px;
+      margin: 5px 0;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    .nav-link:hover,
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    .nav-link i {
+      width: 25px;
+      text-align: center;
+      margin-right: 10px;
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      margin-bottom: 20px;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .project-img {
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px 10px 0 0;
+    }
+    .btn-action {
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      margin-right: 5px;
+    }
+    .stats-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .stats-card h2 {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 0;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+        overflow: hidden;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+
+    .navbar {
+      margin-bottom: 20px;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    h2 {
+      color: #343a40;
+      font-weight: bold;
+    }
+
+    canvas {
+      max-height: 400px;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      background-color: #0d6efd;
+      color: #fff;
+      font-weight: 500;
+      border-radius: 8px;
+      padding: 8px 16px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background-color: #0b5ed7;
+      text-decoration: none;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="p-4">
+      <h4 class="mb-4">Admin Panel</h4>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('add_project') }}" class="nav-link">
+            <i class="fas fa-plus-circle"></i> Add Project
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('logout') }}" class="nav-link">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="container-fluid">
+      <h1 class="mb-4">Admin Dashboard</h1>
+
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="stats-card">
+            <h6>Total Projects</h6>
+            <h2>{{ projects|length }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="dashboard-header mb-4">
+            <h2>Analytics Dashboard</h2>
+            <a href="/" class="btn-cta">↩ Back to Portfolio</a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <h5>Project Views Over Time</h5>
+                    <canvas id="viewsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <h5>Popular Tags</h5>
+                    <canvas id="tagsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <h5>User Device Type</h5>
+                    <canvas id="deviceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <h5>Traffic Sources</h5>
+                    <canvas id="trafficChart"></canvas>
+                    </div>
+            </div>
+        </div>
+      </div>
+
+
+
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Projects</h5>
+
+              {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                      {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Image</th>
+                      <th>Title</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for project in projects %}
+                    <tr>
+                      <td>
+                        <img src="{{ project.image_url }}" alt="{{ project.title }}" style="width: 80px; height: 60px; object-fit: cover;" />
+                      </td>
+                      <td>{{ project.title }}</td>
+                      <td>{{ project.created_at.strftime('%Y-%m-%d') }}</td>
+                      <td>
+                        <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-primary btn-action">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{{ url_for('edit_project', project_id=project.id) }}" class="btn btn-sm btn-warning btn-action">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}" class="d-inline">
+                          <button type="submit" class="btn btn-sm btn-danger btn-action" onclick="return confirm('Are you sure you want to delete this project?')">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+      async function loadChart(api, config, elementId, type = 'line') {
+        const res = await fetch(api);
+        const result = await res.json();
+
+        const ctx = document.getElementById(elementId);
+        new Chart(ctx, {
+            type: type,
+            data: {
+                labels: result.labels,
+                datasets: [{
+                    label: config.label,
+                    data: result.data,
+                    backgroundColor: config.bgColor,
+                    borderColor: config.borderColor || config.bgColor,
+                    fill: config.fill || false,
+                    tension: 0.4
+                }]
+            }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        loadChart('/api/analytics/views', {
+            label: 'Views',
+            bgColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            fill: true
+        }, 'viewsChart', 'line');
+
+        loadChart('/api/analytics/tags', {
+            label: 'Tag Popularity',
+            bgColor: '#0d6efd'
+        }, 'tagsChart', 'bar');
+
+        loadChart('/api/analytics/devices', {
+            label: 'Devices',
+            bgColor: ['#198754', '#ffc107', '#dc3545']
+        }, 'deviceChart', 'doughnut');
+
+        loadChart('/api/analytics/traffic', {
+            label: 'Traffic Sources',
+            bgColor: ['#6f42c1', '#0dcaf0', '#fd7e14', '#20c997']
+        }, 'trafficChart', 'pie');
+      });
+      const viewsChart = new Chart(document.getElementById('viewsChart'), {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Views',
+                data: [120, 190, 300, 150, 220, 170, 250],
+                fill: true,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                tension: 0.4
+            }]
+        }
+      });
+
+      const tagsChart = new Chart(document.getElementById('tagsChart'), {
+        type: 'bar',
+        data: {
+            labels: ['React', 'Python', 'AI', 'ML', 'Cybersecurity'],
+            datasets: [{
+                label: 'Tag Popularity',
+                data: [18, 22, 14, 19, 10],
+                backgroundColor: '#0d6efd'
+            }]
+        }
+      });
+
+    const deviceChart = new Chart(document.getElementById('deviceChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Desktop', 'Mobile', 'Tablet'],
+        datasets: [{
+          data: [60, 30, 10],
+          backgroundColor: ['#198754', '#ffc107', '#dc3545']
+        }]
+      }
+    });
+
+    const trafficChart = new Chart(document.getElementById('trafficChart'), {
+      type: 'pie',
+      data: {
+        labels: ['Direct', 'Social', 'Referral', 'Search Engine'],
+        datasets: [{
+          data: [45, 25, 15, 15],
+          backgroundColor: ['#6f42c1', '#0dcaf0', '#fd7e14', '#20c997']
+        }]
+      }
+    });
+    // Toggle sidebar on mobile
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const mainContent = document.querySelector('.main-content');
+
+      if (sidebar.style.width === '0px' || !sidebar.style.width) {
+        sidebar.style.width = '250px';
+        mainContent.style.marginLeft = '250px';
+      } else {
+        sidebar.style.width = '0';
+        mainContent.style.marginLeft = '0';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="icon" href="{{ url_for('static', filename='img/me.png') }}" type="image/png">
+    <!-- Include Bootstrap for clean and responsive design -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .projects-container {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .card {
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            overflow: hidden;
+        }
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            color: #333;
+        }
+        .card-text {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .card-footer {
+            text-align: center;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .card-footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .card-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Browse Projects</h1>
+    </header>
+    <div class="projects-container" id="projects-list">
+        <!-- Cards will be dynamically injected here -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const projectsList = document.getElementById('projects-list');
+
+            // Fetch projects from the backend
+            fetch('/get_projects')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch projects');
+                    }
+                    return response.json(); // Parse response as JSON
+                })
+                .then(data => {
+                    if (data.projects && data.projects.length > 0) {
+                        data.projects.forEach(project => {
+                            // Create project card
+                            const projectCard = document.createElement('div');
+                            projectCard.className = 'card';
+                            projectCard.innerHTML = `
+                                <img src="${project.image_url}" alt="${project.title}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${project.title}</h5>
+                                    <p class="card-text">${project.description}</p>
+                                </div>
+                                <div class="card-footer">
+                                    ${project.url ? `<a href="${project.url}" target="_blank">View Project</a>` : 'No URL Provided'}
+                                </div>
+                            `;
+                            projectsList.appendChild(projectCard);
+                        });
+                    } else {
+                        projectsList.innerHTML = '<p>No projects found. Please check back later.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching projects:', error);
+                    projectsList.innerHTML = '<p>Failed to load projects. Please try again later.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
